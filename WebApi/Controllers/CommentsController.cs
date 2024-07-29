@@ -10,17 +10,22 @@ namespace JsonPlaceholderWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class CommentsController : ControllerBase
     {
-        private readonly ApiClient _client;
+        private readonly IApiClient _client;
         private readonly AppDbContext _context;
 
-        public CommentsController(ApiClient client, AppDbContext context)
+        public CommentsController(IApiClient client, AppDbContext context)
         {
             _client = client;
             _context = context;
         }
 
+        /// <summary>
+        /// Import comments data on db
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("import-comments")]
         public async Task<IActionResult> ImportComments()
         {
@@ -30,6 +35,10 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Return all comments
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetComments()
         {
@@ -37,6 +46,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(comments);
         }
 
+        /// <summary>
+        /// Return comments by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Comments>> GetCommentsById(int id)
         {
@@ -49,6 +63,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(comments);
         }
 
+        /// <summary>
+        /// Return comments by PostId
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Comments>>> SearchComments([FromQuery] int postId)
         {

@@ -9,17 +9,22 @@ namespace JsonPlaceholderWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class PhotosController : ControllerBase
     {
-        private readonly ApiClient _client;
+        private readonly IApiClient _client;
         private readonly AppDbContext _context;
 
-        public PhotosController(ApiClient client, AppDbContext context)
+        public PhotosController(IApiClient client, AppDbContext context)
         {
             _client = client;
             _context = context;
         }
 
+        /// <summary>
+        /// Import photos data on db
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("import-photos")]
         public async Task<IActionResult> ImportPhotos()
         {
@@ -29,6 +34,10 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Return all photos
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetPhotos()
         {
@@ -36,7 +45,12 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(photos);
         }
 
-        [HttpGet("post/{id}", Name = "GetCPhotosById")]
+        /// <summary>
+        /// Return photos by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
         public async Task<ActionResult<Photos>> GetPhotosById(int id)
         {
             var photos = await _context.Photos.FindAsync(id);
@@ -48,6 +62,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(photos);
         }
 
+        /// <summary>
+        /// Return comments by AlbumId
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Photos>>> SearchPost([FromQuery] int albumId)
         {

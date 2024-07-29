@@ -9,17 +9,22 @@ namespace JsonPlaceholderWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class UsersController : ControllerBase
     {
-        private readonly ApiClient _client;
+        private readonly IApiClient _client;
         private readonly AppDbContext _context;
 
-        public UsersController(ApiClient client, AppDbContext context)
+        public UsersController(IApiClient client, AppDbContext context)
         {
             _client = client;
             _context = context;
         }
 
+        /// <summary>
+        /// Import users data on db
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("import-users")]
         public async Task<IActionResult> ImportUsers()
         {
@@ -33,6 +38,10 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Return all users
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -40,6 +49,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(users);
         }
 
+        /// <summary>
+        /// Return users by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Users>> GetUserById(int id)
         {
@@ -52,6 +66,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(user);
         }
 
+        /// <summary>
+        /// Modifies users by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, Users user)
         {
@@ -81,6 +100,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deelte users by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

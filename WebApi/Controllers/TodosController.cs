@@ -9,17 +9,23 @@ namespace JsonPlaceholderWebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class TodosController : ControllerBase
     {
-        private readonly ApiClient _client;
+        private readonly IApiClient _client;
         private readonly AppDbContext _context;
 
-        public TodosController(ApiClient client, AppDbContext context)
+        public TodosController(IApiClient client, AppDbContext context)
         {
             _client = client;
             _context = context;
         }
 
+
+        /// <summary>
+        /// Import todos data on db
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("import-todos")]
         public async Task<IActionResult> ImportTodos()
         {
@@ -29,6 +35,10 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Return all todos
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetTodos()
         {
@@ -36,6 +46,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(todos);
         }
 
+        /// <summary>
+        /// Return todos by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Todos>> GetTodoById(int id)
         {
@@ -48,6 +63,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return Ok(todo);
         }
 
+        /// <summary>
+        /// Modifies todos by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTodo(int id, Todos todo)
         {
@@ -77,6 +97,11 @@ namespace JsonPlaceholderWebApi.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deelte todos by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodo(int id)
         {
