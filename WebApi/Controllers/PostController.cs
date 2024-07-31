@@ -30,7 +30,7 @@ namespace JsonPlaceholderWebApi.Controllers
         {
             try
             {
-                var posts = await _client.GetPostsAsync();
+                var posts = await _client.GetAsync<Post>("https://jsonplaceholder.typicode.com/posts");
                 if (posts == null || !posts.Any())
                 {
                     throw new NotFoundException("Nessun post da importare");
@@ -52,7 +52,8 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPosts()
         {
-            var posts = await _context.Posts.ToListAsync();
+            //var posts = await _context.Posts.ToListAsync();
+            var posts = await _client.GetAsync<Post>("https://jsonplaceholder.typicode.com/posts");
             return Ok(posts);
         }
 

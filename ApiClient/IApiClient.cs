@@ -10,12 +10,12 @@ namespace JsonPlaceholderApiClient
 {
     public interface IApiClient
     {
-        Task<List<Post>> GetPostsAsync();
-        Task<List<Comments>> GetCommentsAsync();
-        Task<List<Albums>> GetAlbumsAsync();
-        Task<List<Photos>> GetPhotosAsync();
-        Task<List<Todos>> GetTodosAsync();
-        Task<List<Users>> GetUsersAsync();
-
+        //Task<List<Post>> GetPostsAsync();
+        //Task<List<Comments>> GetCommentsAsync();
+        //Task<List<Albums>> GetAlbumsAsync();
+        //Task<List<Photos>> GetPhotosAsync();
+        //Task<List<Todos>> GetTodosAsync();
+        //Task<List<Users>> GetUsersAsync();
+        Task<List<T>> GetAsync<T>(string url);
     }
 }

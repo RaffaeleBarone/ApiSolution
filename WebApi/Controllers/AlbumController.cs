@@ -2,7 +2,6 @@
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
 using JsonPlaceholderWebApi.Exceptions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +30,7 @@ namespace JsonPlaceholderWebApi.Controllers
         {
             try
             {
-                var albums = await _client.GetAlbumsAsync();
+                var albums = await _client.GetAsync<Albums>("https://jsonplaceholder.typicode.com/albums");
                 if (albums == null || !albums.Any())
                 {
                     throw new NotFoundException("Nessun album da importare");
@@ -46,14 +45,15 @@ namespace JsonPlaceholderWebApi.Controllers
             }
         }
 
-            /// <summary>
-            /// Return all albums
-            /// </summary>
-            /// <returns></returns>
-            [HttpGet]
+        /// <summary>
+        /// Return all albums
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
         public async Task<IActionResult> GetAlbums()
         {
-            var albums = await _context.Albums.ToListAsync();
+            //var albums = await _context.Albums.ToListAsync();
+            var albums = await _client.GetAsync<Albums>("https://jsonplaceholder.typicode.com/albums");
             return Ok(albums);
         }
 
@@ -83,7 +83,7 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Albums>>> SearchPost([FromQuery] int userId)
         {
-            if(userId == 0)
+            if (userId == 0)
             {
                 throw new BadRequestException("Invalid User Id");
             }

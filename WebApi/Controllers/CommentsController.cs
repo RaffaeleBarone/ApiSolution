@@ -32,7 +32,7 @@ namespace JsonPlaceholderWebApi.Controllers
         {
             try
             {
-                var comments = await _client.GetCommentsAsync();
+                var comments = await _client.GetAsync<Comments>("https://jsonplaceholder.typicode.com/comments");
                 if (comments == null || !comments.Any())
                 {
                     throw new NotFoundException("Nessun commento da importare");
@@ -55,7 +55,9 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetComments()
         {
-            var comments = await _context.Comments.ToListAsync();
+            //var comments = await _context.Comments.ToListAsync();
+            var comments = await _client.GetAsync<Comments>("https://jsonplaceholder.typicode.com/comments");
+
             return Ok(comments);
         }
 

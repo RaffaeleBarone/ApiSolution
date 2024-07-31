@@ -1,4 +1,5 @@
 ﻿using DataAccess;
+using DataAccess.Entities;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
 using JsonPlaceholderWebApi.Exceptions;
@@ -30,7 +31,7 @@ namespace JsonPlaceholderWebApi.Controllers
         {
             try
             {
-                var users = await _client.GetUsersAsync();
+                var users = await _client.GetAsync<Users>("https://jsonplaceholder.typicode.com/users");
                 if (users == null || !users.Any())
                 {
                     throw new NotFoundException("Nessun utente da importare");
@@ -52,7 +53,8 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _context.Users.ToListAsync();
+            //var users = await _context.Users.ToListAsync();
+            var users = await _client.GetAsync<Users>("https://jsonplaceholder.typicode.com/users");
             return Ok(users);
         }
 

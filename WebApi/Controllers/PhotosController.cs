@@ -1,4 +1,5 @@
 ﻿using DataAccess;
+using DataAccess.Entities;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
 using JsonPlaceholderWebApi.Exceptions;
@@ -31,7 +32,7 @@ namespace JsonPlaceholderWebApi.Controllers
         {
             try
             {
-                var photos = await _client.GetPhotosAsync();
+                var photos = await _client.GetAsync<Photos>("https://jsonplaceholder.typicode.com/photos");
                 if (photos == null || !photos.Any())
                 {
                     throw new NotFoundException("Nessuna foto da importare");
@@ -54,7 +55,9 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPhotos()
         {
-            var photos = await _context.Photos.ToListAsync();
+            //var photos = await _context.Photos.ToListAsync();
+            var photos = await _client.GetAsync<Photos>("https://jsonplaceholder.typicode.com/photos");
+
             return Ok(photos);
         }
 

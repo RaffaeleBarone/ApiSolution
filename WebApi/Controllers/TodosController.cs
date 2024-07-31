@@ -1,4 +1,5 @@
 ﻿using DataAccess;
+using DataAccess.Entities;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
 using JsonPlaceholderWebApi.Exceptions;
@@ -31,7 +32,7 @@ namespace JsonPlaceholderWebApi.Controllers
         {
             try
             {
-                var todos = await _client.GetTodosAsync();
+                var todos = await _client.GetAsync<Todos>("https://jsonplaceholder.typicode.com/todos");
                 if (todos == null || !todos.Any())
                 {
                     throw new NotFoundException("Nessun toDo da importare");
@@ -54,7 +55,9 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTodos()
         {
-            var todos = await _context.Todos.ToListAsync();
+            //var todos = await _context.Todos.ToListAsync();
+            var todos = await _client.GetAsync<Todos>("https://jsonplaceholder.typicode.com/todos");
+
             return Ok(todos);
         }
 
