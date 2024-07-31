@@ -1,7 +1,7 @@
 ﻿using DataAccess;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
-using Microsoft.AspNetCore.Http;
+using JsonPlaceholderWebApi.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,10 +29,22 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpPost("import-todos")]
         public async Task<IActionResult> ImportTodos()
         {
-            var todos = await _client.GetTodosAsync();
-            _context.Todos.AddRange(todos);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                var todos = await _client.GetTodosAsync();
+                if (todos == null || !todos.Any())
+                {
+                    throw new NotFoundException("Nessun toDo da importare");
+                }
+
+                _context.Todos.AddRange(todos);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw new InternalServerErrorException($"Errore nell'import dei toDo: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -57,7 +69,7 @@ namespace JsonPlaceholderWebApi.Controllers
             var todo = await _context.Todos.FindAsync(id);
             if (todo == null)
             {
-                return NotFound();
+                throw new NotFoundException($"ToDo con ID {id} non trovato");
             }
 
             return Ok(todo);
@@ -108,7 +120,7 @@ namespace JsonPlaceholderWebApi.Controllers
             var todo = await _context.Todos.FindAsync(id);
             if (todo == null)
             {
-                return NotFound();
+                throw new NotFoundException($"ToDo con ID {id} non trovato");
             }
 
             _context.Todos.Remove(todo);

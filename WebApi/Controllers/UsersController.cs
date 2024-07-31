@@ -1,7 +1,7 @@
 ﻿using DataAccess;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
-using Microsoft.AspNetCore.Http;
+using JsonPlaceholderWebApi.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,14 +28,21 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpPost("import-users")]
         public async Task<IActionResult> ImportUsers()
         {
-            var users = await _client.GetUsersAsync();
-            if (users == null || !users.Any())
+            try
             {
-                return BadRequest("Nessun user trovato");
+                var users = await _client.GetUsersAsync();
+                if (users == null || !users.Any())
+                {
+                    throw new NotFoundException("Nessun utente da importare");
+                }
+                _context.Users.AddRange(users);
+                await _context.SaveChangesAsync();
+                return Ok();
             }
-            _context.Users.AddRange(users);
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                throw new InternalServerErrorException($"Errore nell'import dei post: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -60,7 +67,7 @@ namespace JsonPlaceholderWebApi.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
-                return NotFound();
+                throw new NotFoundException($"User con ID {id} non trovato");
             }
 
             return Ok(user);
@@ -111,7 +118,7 @@ namespace JsonPlaceholderWebApi.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
-                return NotFound();
+                throw new NotFoundException($"User con ID {id} non trovato");
             }
 
             _context.Users.Remove(user);

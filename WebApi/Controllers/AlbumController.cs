@@ -1,6 +1,7 @@
 ﻿using DataAccess;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
+using JsonPlaceholderWebApi.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,17 +29,28 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpPost("import-albums")]
         public async Task<IActionResult> ImportAlbums()
         {
-            var albums = await _client.GetAlbumsAsync();
-            _context.Albums.AddRange(albums);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                var albums = await _client.GetAlbumsAsync();
+                if (albums == null || !albums.Any())
+                {
+                    throw new NotFoundException("Nessun album da importare");
+                }
+                _context.Albums.AddRange(albums);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw new InternalServerErrorException($"Errore nell'import degli album: {ex.Message}");
+            }
         }
 
-        /// <summary>
-        /// Return all albums
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
+            /// <summary>
+            /// Return all albums
+            /// </summary>
+            /// <returns></returns>
+            [HttpGet]
         public async Task<IActionResult> GetAlbums()
         {
             var albums = await _context.Albums.ToListAsync();
@@ -56,7 +68,8 @@ namespace JsonPlaceholderWebApi.Controllers
             var albums = await _context.Albums.FindAsync(id);
             if (albums == null)
             {
-                return NotFound();
+                //return NotFound();
+                throw new NotFoundException($"Album con ID {id} non trovato");
             }
 
             return Ok(albums);
@@ -70,11 +83,16 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Albums>>> SearchPost([FromQuery] int userId)
         {
+            if(userId == 0)
+            {
+                throw new BadRequestException("Invalid User Id");
+            }
+
             var albums = await _context.Albums.Where(c => c.userId == userId).ToListAsync();
 
-            if (albums == null || albums.Count == 0)
+            if (albums == null || !albums.Any())
             {
-                return NotFound();
+                throw new NotFoundException($"Nessun album trovato con userId: {userId}.");
             }
 
             return Ok(albums);

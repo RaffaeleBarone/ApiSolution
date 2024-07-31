@@ -1,6 +1,7 @@
 ﻿using DataAccess;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
+using JsonPlaceholderWebApi.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,10 +29,22 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpPost("import-photos")]
         public async Task<IActionResult> ImportPhotos()
         {
-            var photos = await _client.GetPhotosAsync();
-            _context.Photos.AddRange(photos);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                var photos = await _client.GetPhotosAsync();
+                if (photos == null || !photos.Any())
+                {
+                    throw new NotFoundException("Nessuna foto da importare");
+                }
+
+                _context.Photos.AddRange(photos);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw new InternalServerErrorException($"Errore nell'import: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -56,7 +69,7 @@ namespace JsonPlaceholderWebApi.Controllers
             var photos = await _context.Photos.FindAsync(id);
             if (photos == null)
             {
-                return NotFound();
+                throw new NotFoundException($"Foto con ID {id} non trovato");
             }
 
             return Ok(photos);
@@ -70,11 +83,15 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Photos>>> SearchPost([FromQuery] int albumId)
         {
+            if (albumId <= 0)
+            {
+                throw new BadRequestException("Invalid album ID.");
+            }
             var photos = await _context.Photos.Where(p => p.AlbumId == albumId).ToListAsync();
 
-            if (photos == null || photos.Count == 0)
+            if (photos == null || !photos.Any())
             {
-                return NotFound();
+                throw new NotFoundException($"Nessuna foto trovato con albumId: {albumId}.");
             }
 
             return Ok(photos);

@@ -2,6 +2,7 @@
 using DataAccess.Entities;
 using JsonPlaceholderApiClient;
 using JsonPlaceholderDataAccess.Entities;
+using JsonPlaceholderWebApi.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,10 +30,22 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpPost("import-comments")]
         public async Task<IActionResult> ImportComments()
         {
-            var comments = await _client.GetCommentsAsync();
-            _context.Comments.AddRange(comments);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                var comments = await _client.GetCommentsAsync();
+                if (comments == null || !comments.Any())
+                {
+                    throw new NotFoundException("Nessun commento da importare");
+                }
+
+                _context.Comments.AddRange(comments);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                throw new InternalServerErrorException($"Errore nell'import dei commenti: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -57,7 +70,7 @@ namespace JsonPlaceholderWebApi.Controllers
             var comments = await _context.Comments.FindAsync(id);
             if (comments == null)
             {
-                return NotFound();
+                throw new NotFoundException($"Commento con ID {id} non trovato");
             }
 
             return Ok(comments);
@@ -71,10 +84,14 @@ namespace JsonPlaceholderWebApi.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Comments>>> SearchComments([FromQuery] int postId)
         {
-            var comments = await _context.Comments.Where(c => c.postID == postId).ToListAsync();
-            if (comments == null || comments.Count == 0)
+            if (postId <= 0)
             {
-                return NotFound();
+                throw new BadRequestException("Invalid post ID.");
+            }
+            var comments = await _context.Comments.Where(c => c.postID == postId).ToListAsync();
+            if (comments == null || !comments.Any())
+            {
+                throw new NotFoundException($"Nessun commento trovato con postId: {postId}.");
             }
 
             return Ok(comments);
